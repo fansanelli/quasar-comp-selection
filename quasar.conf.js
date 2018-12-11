@@ -55,6 +55,7 @@ module.exports = function (ctx) {
         'QItemMain',
         'QItemSide',
         'QInfiniteScroll',
+        'QSpinnerDots',
         'QRadio',
         'QSearch',
         'QField',

@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-selection-area :itemsList="this.myList" @update:selected="selected = $event" />
+    <q-selection-area :itemsList="this.myList" :beginSelected="this.selected" @update:selected="selected = $event" />
   </q-page>
 </template>
 
@@ -16,7 +16,7 @@ export default {
   data: function () {
     return {
       myList: countries.list,
-      selected: []
+      selected: ['IT', 'GB', 'DE']
     }
   },
   watch: {

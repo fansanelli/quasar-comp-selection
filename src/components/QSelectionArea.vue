@@ -1,7 +1,7 @@
 <template>
   <div>
     <div class="q-mb-lg">
-      <div class="text-right">
+      <div class="text-right text-primary">
         <q-btn label="Select all" @click="selectAll" />
         <q-btn label="Reset" @click="reset" />
       </div>
@@ -23,7 +23,7 @@
             </q-item-main>
           </q-item>
         </q-list>
-        <q-list inset-delimiter class="col-12 col-md-6">
+        <q-list inset-delimiter class="col-12 col-md-6 text-center">
           <q-list-header>
             Available
             <q-field>
@@ -46,6 +46,8 @@
                 {{item.label}}
               </q-item-main>
             </q-item>
+
+            <q-spinner-dots slot="message" :size="40" ref="spinner"></q-spinner-dots>
           </q-infinite-scroll>
         </q-list>
       </div>
@@ -141,6 +143,11 @@ export default {
       }
     }
   },
-  props: ['itemsList']
+  created: function () {
+    this.beginSelected.forEach(el => {
+      this.add(el)
+    })
+  },
+  props: ['itemsList', 'beginSelected']
 }
 </script>
