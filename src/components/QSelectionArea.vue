@@ -71,6 +71,7 @@ export default {
           this.nrShownResults += MAX_RESULTS
         } else {
           this.nrShownResults = this.unselectedItemsList.length
+          this.stopScrolling()
         }
         done()
       }, 300)
@@ -98,7 +99,7 @@ export default {
       }).map((item) => {
         return item.value
       }))
-      this.nrShownResults = this.unselectedItemsList.length
+      this.nrShownResults = this.selectedItemsList.length
     },
     stopScrolling () {
       if (typeof this.$refs.infiniteScroll !== 'undefined') {
