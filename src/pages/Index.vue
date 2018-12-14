@@ -1,6 +1,6 @@
 <template>
   <q-page padding>
-    <q-selection-area :itemsList="this.myList" :beginSelected="this.selected" @update:selected="selected = $event" />
+    <q-selection-area :itemsList="this.myList" :selected="this.selected" @update:selected="selected = $event" />
   </q-page>
 </template>
 

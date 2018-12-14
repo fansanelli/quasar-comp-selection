@@ -12,8 +12,7 @@
             <div class="row justify-between">
               Selected
               <div>
-                <q-radio v-model="include" :val="true" label="Include" />
-                <q-radio v-model="include" :val="false" label="Exclude" />
+                <q-btn size="sm" text-color="primary" label="Toggle selection" @click="toggle" />
               </div>
             </div>
           </q-list-header>
@@ -61,8 +60,6 @@ export default {
   name: 'q-selection-area',
   data: function () {
     return {
-      selectedItemsListValues: [],
-      include: true,
       search: '',
       nrShownResults: 0
     }
@@ -74,80 +71,66 @@ export default {
           this.nrShownResults += MAX_RESULTS
         } else {
           this.nrShownResults = this.unselectedItemsList.length
-          if (typeof this.$refs.infiniteScroll !== 'undefined') {
-            this.$refs.infiniteScroll.stop()
-          }
         }
         done()
       }, 300)
     },
-    getListOfSelectedItems () {
-      const include = this.include
-      return this.itemsList.filter((item) => {
-        return include ? this.selectedItemsListValues.indexOf(item.value) !== -1
-          : this.selectedItemsListValues.indexOf(item.value) === -1
-      })
-    },
     add (value) {
-      --this.nrShownResults
-      this.selectedItemsListValues.push(value)
-      this.$emit('update:selected', this.getListOfSelectedItems())
+      ++this.nrShownResults
+      this.$emit('update:selected', this.selected.concat(value))
     },
     remove (value) {
-      ++this.nrShownResults
-      this.selectedItemsListValues.splice(this.selectedItemsListValues.indexOf(value), 1)
-      this.$emit('update:selected', this.getListOfSelectedItems())
+      --this.nrShownResults
+      this.$emit('update:selected', this.selected.filter((f) => { return f.indexOf(value) === -1 }))
     },
     selectAll () {
       this.nrShownResults = this.itemsList.length
-      this.selectedItemsListValues = this.itemsList.map((item) => { return item.value })
-      this.$emit('update:selected', this.getListOfSelectedItems())
+      this.$emit('update:selected', this.itemsList.map((item) => { return item.value }))
     },
     reset () {
       this.nrShownResults = 0
-      this.selectedItemsListValues = []
-      this.$emit('update:selected', this.getListOfSelectedItems())
+      this.$emit('update:selected', [])
+      this.resumeScrolling()
+    },
+    toggle () {
+      this.$emit('update:selected', this.itemsList.filter((f) => {
+        return this.selected.indexOf(f.value) === -1
+      }).map((item) => {
+        return item.value
+      }))
+      this.nrShownResults = this.unselectedItemsList.length
+    },
+    stopScrolling () {
+      if (typeof this.$refs.infiniteScroll !== 'undefined') {
+        this.$refs.infiniteScroll.stop()
+      }
+    },
+    resumeScrolling () {
+      if (typeof this.$refs.infiniteScroll !== 'undefined') {
+        this.$refs.infiniteScroll.resume()
+        this.$refs.infiniteScroll.loadMore()
+      }
     }
   },
   computed: {
     selectedItemsList () {
       return this.itemsList.filter((item) => {
-        return this.selectedItemsListValues.indexOf(item.value) !== -1
+        return this.selected.indexOf(item.value) !== -1
       })
     },
     unselectedItemsList () {
       const search = this.search.toUpperCase()
       return this.itemsList.filter((item) => {
-        return this.selectedItemsListValues.indexOf(item.value) === -1 &&
+        return this.selected.indexOf(item.value) === -1 &&
           (search.length === 0 || item.label.toUpperCase().indexOf(search) !== -1)
       })
     }
   },
   watch: {
-    include () {
-      this.$emit('update:selected', this.getListOfSelectedItems())
-    },
     search () {
-      this.nrShownResults = this.selectedItemsList.length
-      if (typeof this.$refs.infiniteScroll !== 'undefined') {
-        this.$refs.infiniteScroll.resume()
-        this.$refs.infiniteScroll.loadMore()
-      }
-    },
-    nrShownResults () {
-      if (this.nrShownResults === 0) {
-        if (typeof this.$refs.infiniteScroll !== 'undefined') {
-          this.$refs.infiniteScroll.resume()
-          this.$refs.infiniteScroll.loadMore()
-        }
-      }
+      this.resumeScrolling()
     }
   },
-  created: function () {
-    this.beginSelected.forEach(el => {
-      this.add(el)
-    })
-  },
-  props: ['itemsList', 'beginSelected']
+  props: ['itemsList', 'selected']
 }
 </script>
