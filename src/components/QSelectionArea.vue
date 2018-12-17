@@ -6,50 +6,50 @@
         <q-btn label="Reset" @click="reset" />
       </div>
     </div>
-      <div class="row" style="height: 70vh !important;">
-        <q-list inset-delimiter class="col-12 col-md-6">
-          <q-list-header>
-            <div class="row justify-between">
-              Selected
-              <div>
-                <q-btn size="sm" text-color="primary" label="Toggle selection" @click="toggle" />
-              </div>
+    <div class="row" style="height: 70vh !important;">
+      <q-list inset-delimiter class="col-12 col-md-6">
+        <q-list-header>
+          <div class="row justify-between">
+            Selected
+            <div>
+              <q-btn size="sm" text-color="primary" label="Toggle selection" @click="toggle" />
             </div>
-          </q-list-header>
-          <q-item separator :key="item.value" v-for="item in selectedItemsList">
-            <q-item-main label @click.native="remove(item.value)">
+          </div>
+        </q-list-header>
+        <q-item separator :key="item.value" v-for="item in selectedItemsList">
+          <q-item-main label @click.native="remove(item.value)">
+            {{item.label}}
+          </q-item-main>
+        </q-item>
+      </q-list>
+      <q-list inset-delimiter class="col-12 col-md-6 text-center">
+        <q-list-header>
+          Available
+          <q-field>
+            <q-search
+              v-model="search"
+              clearable
+              class="q-mb-sm"
+              :debounce="250"
+            />
+          </q-field>
+        </q-list-header>
+        <q-infinite-scroll
+          :handler="loadMore"
+          inline
+          style="height: 50vh !important; overflow: auto;"
+          ref="infiniteScroll"
+        >
+          <q-item separator :key="item.value" v-for="(item, key) in unselectedItemsList" v-if="key < nrShownResults">
+            <q-item-main label @click.native="add(item.value)">
               {{item.label}}
             </q-item-main>
           </q-item>
-        </q-list>
-        <q-list inset-delimiter class="col-12 col-md-6 text-center">
-          <q-list-header>
-            Available
-            <q-field>
-              <q-search
-                v-model="search"
-                clearable
-                class="q-mb-sm"
-                :debounce="250"
-              />
-            </q-field>
-          </q-list-header>
-          <q-infinite-scroll
-            :handler="loadMore"
-            inline
-            style="height: 50vh !important; overflow: auto;"
-            ref="infiniteScroll"
-          >
-            <q-item separator :key="item.value" v-for="(item, key) in unselectedItemsList" v-if="key < nrShownResults">
-              <q-item-main label @click.native="add(item.value)">
-                {{item.label}}
-              </q-item-main>
-            </q-item>
 
-            <q-spinner-dots slot="message" :size="40" ref="spinner"></q-spinner-dots>
-          </q-infinite-scroll>
-        </q-list>
-      </div>
+          <q-spinner-dots slot="message" :size="40" ref="spinner"></q-spinner-dots>
+        </q-infinite-scroll>
+      </q-list>
+    </div>
   </div>
 </template>
 
@@ -94,12 +94,13 @@ export default {
       this.resumeScrolling()
     },
     toggle () {
-      this.$emit('update:selected', this.itemsList.filter((f) => {
-        return this.selected.indexOf(f.value) === -1
-      }).map((item) => {
+      const selected = this.itemsList.map((item) => {
         return item.value
-      }))
-      this.nrShownResults = this.selectedItemsList.length
+      }).filter((f) => {
+        return this.selected.indexOf(f) === -1
+      })
+      this.nrShownResults = Math.max(selected.length, MAX_RESULTS)
+      this.$emit('update:selected', selected)
     },
     stopScrolling () {
       if (typeof this.$refs.infiniteScroll !== 'undefined') {
