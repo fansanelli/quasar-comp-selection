@@ -22,8 +22,8 @@
           </q-item-main>
         </q-item>
       </q-list>
-      <q-list inset-delimiter class="col-12 col-md-6 text-center">
-        <q-list-header>
+      <q-list inset-delimiter class="col-12 col-md-6 text-center border-top-color-sm">
+        <q-list-header class="text-left">
           Available
           <q-field>
             <q-search
@@ -82,7 +82,7 @@ export default {
     },
     remove (value) {
       --this.nrShownResults
-      this.$emit('update:selected', this.selected.filter((f) => { return f.indexOf(value) === -1 }))
+      this.$emit('update:selected', this.selected.filter((f) => { return f !== value }))
     },
     selectAll () {
       this.nrShownResults = this.itemsList.length
@@ -131,8 +131,21 @@ export default {
   watch: {
     search () {
       this.resumeScrolling()
+    },
+    nrShownResults () {
+      if (this.nrShownResults <= 0) {
+        this.resumeScrolling()
+      }
     }
   },
   props: ['itemsList', 'selected']
 }
 </script>
+
+<style>
+@media only screen and (max-width: 767px) {
+  .border-top-color-sm {
+    border-top-color: #929499;
+  }
+}
+</style>
